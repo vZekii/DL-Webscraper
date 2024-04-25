@@ -1,0 +1,5 @@
+.venv
+.vscode
+
+data.json
+chromedriver.exe
