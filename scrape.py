@@ -6,6 +6,7 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 import time
+import sys
 
 # Headers to use with the web driver
 HEADERS = {
@@ -28,15 +29,26 @@ class Scraper:
         self.site_name = site
         self.site_url = SITES[site]
 
+        self.driver_location = ""
         # Set up the Selenium WebDriver
-        self.driver = webdriver.Chrome(
-            service=Service(f"{os.getcwd()}/chromedriver.exe")
-        )
+        if sys.platform.startswith("win32"):
+            self.driver_location = f"{os.getcwd()}/chromedriver.exe"
+        elif sys.platform.startswith("darwin"):
+            self.driver_location = f"{os.getcwd()}/chromedriver"
+        else:
+            raise Exception("Platform not detected or incorrect")
+
+    def load_site(self, time_to_wait=5):
+        if not os.path.isfile(self.driver_location):
+            raise Exception(
+                "You'll need to install chromedriver, check the readme for downloads"
+            )
+        self.driver = webdriver.Chrome(service=Service(self.driver_location))
 
         self.driver.get(self.site_url)
 
         # Wait for the page to resolve
-        time.sleep(5)
+        time.sleep(time_to_wait)
 
     def scroll_fullpage(self):
         """Function to scroll the page fully slowly to load all the images"""
@@ -70,28 +82,43 @@ class Scraper:
             for url in img_urls:
                 file.write(f"{url}\n")
 
+        return img_urls
 
-def download_images(image_urls):
-    for url in image_urls:
-        filename = re.search(r"/([\w_-]+[.](jpg|gif|png))$", url)
-        if not filename:
-            print("Regex didn't match with the url: {}".format(url))
-            continue
-        with open(filename.group(1), "wb") as f:
-            if "http" not in url:
-                # sometimes an image source can be relative
-                # if it is provide the base url which also happens
-                # to be the site variable atm.
-                url = "{}{}".format(site, url)
-            response = requests.get(url)
-            f.write(response.content)
+    def download_images_from_file(self):
+        # Check if the file exists before opening it
+        if not os.path.isfile(f"{self.site_name}.txt"):
+            print("File not found, please run get_image_links first")
+            return
+
+        with open(f"{self.site_name}.txt", "r") as file:
+            urls = file.readlines()
+
+        # Show how many are going to be downloaded
+        print(f"Downloading {len(urls)} images from {self.site_name}")
+
+        # Download all the images from the urls in the file
+        for i, url in enumerate(urls):
+            response = requests.get(url.strip(), headers=HEADERS)
+            if not os.path.exists(self.site_name):
+                os.makedirs(self.site_name)
+            with open(f"{self.site_name}/{i}.jpg", "wb") as image:
+                image.write(response.content)
+
+            break
 
 
 def main():
-    scraper = Scraper("zara")
+    scraper = Scraper("zara_tshirts")
+    scraper.load_site()
     scraper.scroll_fullpage()
     scraper.get_image_links()
+    scraper.download_images_from_file()
+
+
+def test():
+    scraper = Scraper("zara_tshirts")
+    scraper.download_images_from_file()
 
 
 if __name__ == "__main__":
-    main()
+    test()

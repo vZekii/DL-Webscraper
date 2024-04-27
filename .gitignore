@@ -1,5 +1,7 @@
 .venv
 .vscode
+.DS_Store
 
 data.json
 chromedriver.exe
+chromedriver
