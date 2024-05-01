@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 import time
 import sys
+from urllib.parse import unquote
 
 # Headers to use with the web driver
 HEADERS = {
@@ -17,6 +18,13 @@ HEADERS = {
 SITES = {
     "zara_tshirts": "https://www.zara.com/au/en/man-tshirts-l855.html?v1=2037185",
     "uniqlo_tshirts": "https://www.uniqlo.com/au/en/men/tops/t-shirts",
+    "iconic_tshirts": "https://www.theiconic.com.au/mens-clothing-tshirts-singlets/",
+    "iconic_shirts": "https://www.theiconic.com.au/mens-clothing-shirts-polos/",
+    "iconic_coat_jackets": "https://www.theiconic.com.au/mens-clothing-coats-jackets/",
+    "iconic_sweats_hoods": "https://www.theiconic.com.au/mens-clothing-sweats-hoodies/",
+    "iconic_jeans": "https://www.theiconic.com.au/mens-clothing-jeans/",
+    "iconic_pants": "https://www.theiconic.com.au/mens-clothing-pants/",
+    "iconic_shorts": "https://www.theiconic.com.au/mens-clothing-shorts/",
 }
 
 # Change depending on how long the page takes to load - wifi dependent
@@ -49,6 +57,36 @@ class Scraper:
 
         # Wait for the page to resolve
         time.sleep(time_to_wait)
+
+    def scroll_multipage(self, num_pages):
+        # function to scroll through multiple pages by adding a number in the url, and saving the images from each page while doing so
+        for i in range(num_pages):
+            self.scroll_fullpage()
+            # Get the page source
+            page = self.driver.page_source
+
+            # Parse the page source
+            soup = BeautifulSoup(page, "html.parser")
+
+            # Find all the image tags
+            img_tags = soup.find_all("img")
+
+            # Get the image urls
+            img_urls = [img["src"] for img in img_tags if img.has_attr("src")]
+
+            # Save the image urls to a single file, and append the new urls to the file
+            last_link = ""
+            with open(f"{self.site_name}.txt", "a") as file:
+                for url in img_urls:
+                    if "static.theiconic.com.au" in url and ":format(webp)" in url:
+                        url = remove_webp_extension(url)
+                        if last_link != url:
+                            file.write(f"{url}\n")
+                            last_link = url
+
+            # Scroll to the next page
+            self.driver.get(f"{self.site_url}?page={i+2}")
+            time.sleep(SCROLL_PAUSE_TIME)
 
     def scroll_fullpage(self):
         """Function to scroll the page fully slowly to load all the images"""
@@ -104,21 +142,30 @@ class Scraper:
             with open(f"{self.site_name}/{i}.jpg", "wb") as image:
                 image.write(response.content)
 
-            break
-
 
 def main():
-    scraper = Scraper("zara_tshirts")
+    scraper = Scraper("iconic_shorts")
     scraper.load_site()
-    scraper.scroll_fullpage()
-    scraper.get_image_links()
+    scraper.scroll_multipage(10)
+    # scraper.scroll_fullpage()
+    # scraper.get_image_links()
     scraper.download_images_from_file()
 
 
 def test():
-    scraper = Scraper("zara_tshirts")
+    scraper = Scraper("uniqlo_tshirts")
     scraper.download_images_from_file()
 
 
+def remove_webp_extension(url):
+    decoded_url = unquote(url)  # Decode the URL
+    # Check if "/format(webp)" exists in the URL
+    if ":format(webp)/" in decoded_url:
+        url_split = decoded_url.split(":format(webp)/")
+        return url_split[1]
+
+    return url
+
+
 if __name__ == "__main__":
-    test()
+    main()
