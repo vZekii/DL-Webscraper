@@ -26,4 +26,6 @@ Categories:
   - Upper body
     - Dresses
     - Crop tops
+  - lower body
+    - skirts
 - Shoes (DLC)

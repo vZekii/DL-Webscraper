@@ -20,11 +20,17 @@ SITES = {
     "uniqlo_tshirts": "https://www.uniqlo.com/au/en/men/tops/t-shirts",
     "iconic_tshirts": "https://www.theiconic.com.au/mens-clothing-tshirts-singlets/",
     "iconic_shirts": "https://www.theiconic.com.au/mens-clothing-shirts-polos/",
-    "iconic_coat_jackets": "https://www.theiconic.com.au/mens-clothing-coats-jackets/",
-    "iconic_sweats_hoods": "https://www.theiconic.com.au/mens-clothing-sweats-hoodies/",
-    "iconic_jeans": "https://www.theiconic.com.au/mens-clothing-jeans/",
+    "iconic_coat_jackets_new": "https://www.theiconic.com.au/mens-clothing-coats-jackets/",
+    "iconic_sweats_hoods_new": "https://www.theiconic.com.au/mens-clothing-sweats-hoodies/",
+    "iconic_jeans_new": "https://www.theiconic.com.au/mens-clothing-jeans/",
     "iconic_pants": "https://www.theiconic.com.au/mens-clothing-pants/",
     "iconic_shorts": "https://www.theiconic.com.au/mens-clothing-shorts/",
+    "iconic_womens_skirts": "https://www.theiconic.com.au/womens-clothing-skirts/",
+    "iconic_womens_dresses": "https://www.theiconic.com.au/womens-clothing-dresses/",
+    "iconic_womens_shorts": "https://www.theiconic.com.au/womens-clothing-shorts/",
+    "iconic_womens_tshirts": "https://www.theiconic.com.au/womens-clothing-tshirts-singlets/",
+    "iconic_womens_pants": "https://www.theiconic.com.au/womens-clothing-pants/",
+    "iconic_womens_sweats_hoods": "https://www.theiconic.com.au/womens-clothing-sweats-hoodies/",
 }
 
 # Change depending on how long the page takes to load - wifi dependent
@@ -144,12 +150,22 @@ class Scraper:
 
 
 def main():
-    scraper = Scraper("iconic_shorts")
+    # for i in list(
+    #     [
+    #         "iconic_womens_sweats_hoods",
+    #         "iconic_womens_pants",
+    #         "iconic_womens_shorts",
+    #         "iconic_womens_dresses",
+    #         "iconic_womens_tshirts",
+    #         "iconic_womens_skirts",
+    #     ]
+    # ):
+    scraper = Scraper("iconic_jeans_new")
     scraper.load_site()
-    scraper.scroll_multipage(10)
+    scraper.scroll_multipage(1)
     # scraper.scroll_fullpage()
     # scraper.get_image_links()
-    scraper.download_images_from_file()
+    # scraper.download_images_from_file()
 
 
 def test():
